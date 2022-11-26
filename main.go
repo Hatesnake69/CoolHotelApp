@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Apartment struct {
+type Apartments struct {
 	ID                 uint
 	Name               string
 	Description        string
@@ -18,13 +18,13 @@ type Apartment struct {
 	SleepingPlaceCount uint
 }
 
-type Booking struct {
+type Bookings struct {
 	ID            uint
 	Name          uint
 	PhoneNumber   string
 	ArrivalTime   time.Time
 	DepartureTime time.Time
-	ApartmentID   Apartment
+	ApartmentID   uint
 	Status        string
 }
 
@@ -35,10 +35,13 @@ type Pictures struct {
 
 func main() {
 	dsn := "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"
-	_, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Panic(err)
 	}
+	db.Migrator().CreateTable(&Pictures{})
+	db.Migrator().CreateTable(&Apartments{})
+	db.Migrator().CreateTable(&Bookings{})
 	http.HandleFunc("/", HelloServer)
 	http.ListenAndServe(":8080", nil)
 }
