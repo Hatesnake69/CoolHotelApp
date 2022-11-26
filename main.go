@@ -2,8 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Apartment struct {
@@ -30,6 +34,11 @@ type Pictures struct {
 }
 
 func main() {
+	dsn := "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"
+	_, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Panic(err)
+	}
 	http.HandleFunc("/", HelloServer)
 	http.ListenAndServe(":8080", nil)
 }
