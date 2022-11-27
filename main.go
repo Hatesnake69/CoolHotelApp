@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var db *gorm.DB
+
 type Apartments struct {
 	ID                 uint   `json:"id"`
 	Name               string `json:"name"`
@@ -87,5 +89,7 @@ func HelloServer(w http.ResponseWriter, r *http.Request) {
 }
 
 func getApartments(c *gin.Context) {
+	var result []Apartments
+	db.Find(&result)
 	c.IndentedJSON(http.StatusOK, dummyApartments)
 }
