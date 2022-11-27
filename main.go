@@ -35,9 +35,9 @@ type Pictures struct {
 }
 
 var dummyApartments = []Apartments{
-	{ID: 1, Name: "Комната на первом этаже", Description: "Комната с видом на море", RoomCount: 1},
-	{ID: 2, Name: "Комната на втором этаже", Description: "Комната с видом на море", RoomCount: 2},
-	{ID: 3, Name: "Комната на третьем этаже", Description: "Комната с видом на море", RoomCount: 3},
+	{ID: 1, Name: "Комната на первом этаже", Description: "Комната с видом на море", RoomCount: 1, SleepingPlaceCount: 2},
+	{ID: 2, Name: "Комната на втором этаже", Description: "Комната с видом на море", RoomCount: 2, SleepingPlaceCount: 3},
+	{ID: 3, Name: "Комната на третьем этаже", Description: "Комната с видом на море", RoomCount: 3, SleepingPlaceCount: 4},
 }
 
 var dummyBooking = []Bookings{
@@ -53,10 +53,13 @@ var dummyPictures = []Pictures{
 
 func main() {
 	dsn := "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"
-	_, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Panic(err)
 	}
+
+	db.AutoMigrate(&Apartments{}, &Bookings{}, &Pictures{})
+
 	router := gin.Default()
 	router.GET("/apartments", getApartments)
 	router.Run("localhost:8080")
