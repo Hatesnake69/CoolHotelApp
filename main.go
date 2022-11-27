@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -56,10 +55,7 @@ var dummyPictures = []Pictures{
 
 func main() {
 	dsn := "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Panic(err)
-	}
+	db, _ = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	db.AutoMigrate(&Apartments{})
 	db.AutoMigrate(&Bookings{})
@@ -89,7 +85,8 @@ func HelloServer(w http.ResponseWriter, r *http.Request) {
 }
 
 func getApartments(c *gin.Context) {
+
 	var result []Apartments
 	db.Find(&result)
-	c.IndentedJSON(http.StatusOK, dummyApartments)
+	c.IndentedJSON(http.StatusOK, result)
 }
