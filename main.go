@@ -25,13 +25,14 @@ type Bookings struct {
 	PhoneNumber   string    `json:"description"`
 	ArrivalTime   time.Time `json:"arrival_time"`
 	DepartureTime time.Time `json:"departure_time"`
-	ApartmentID   uint      `json:"apartment_id"`
+	ApartmentID   uint      `json:"apartment_id" gorm:"foreignKey:ApartmentsID;references:ID"`
 	Status        string    `json:"status"`
 }
 
 type Pictures struct {
-	ID       uint   `json:"id"`
-	FileName string `json:"file_name"`
+	ID          uint   `json:"id"`
+	ApartmentID uint   `json:"apartment_id" gorm:"foreignKey:ApartmentsID;references:ID"`
+	FileName    string `json:"file_name"`
 }
 
 var dummyApartments = []Apartments{
@@ -46,9 +47,9 @@ var dummyBooking = []Bookings{
 }
 
 var dummyPictures = []Pictures{
-	{ID: 1, FileName: "109270328975140283.jpg"},
-	{ID: 2, FileName: "786343127693487123.jpg"},
-	{ID: 3, FileName: "109823409127364322.jpg"},
+	{ID: 1, FileName: "109270328975140283.jpg", ApartmentID: 2},
+	{ID: 2, FileName: "786343127693487123.jpg", ApartmentID: 1},
+	{ID: 3, FileName: "109823409127364322.jpg", ApartmentID: 3},
 }
 
 func main() {
@@ -58,7 +59,23 @@ func main() {
 		log.Panic(err)
 	}
 
-	db.AutoMigrate(&Apartments{}, &Bookings{}, &Pictures{})
+	db.AutoMigrate(&Apartments{})
+	db.AutoMigrate(&Bookings{})
+	db.AutoMigrate(&Pictures{})
+
+	if db.Find(&Apartments{}).RowsAffected == 0 &&
+		db.Find(&Bookings{}).RowsAffected == 0 &&
+		db.Find(&Bookings{}).RowsAffected == 0 {
+		for _, item := range dummyApartments {
+			db.Create(&item)
+		}
+		for _, item := range dummyPictures {
+			db.Create(&item)
+		}
+		for _, item := range dummyBooking {
+			db.Create(&item)
+		}
+	}
 
 	router := gin.Default()
 	router.GET("/apartments", getApartments)
