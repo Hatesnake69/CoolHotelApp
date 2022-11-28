@@ -1,16 +1,13 @@
 package main
 
 import (
+	"cool-hotel-app/db"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
-
-var db *gorm.DB
 
 type Apartments struct {
 	ID                 uint   `json:"id"`
@@ -54,24 +51,21 @@ var dummyPictures = []Pictures{
 }
 
 func main() {
-	dsn := "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"
-	db, _ = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db.PostgresDB.AutoMigrate(&Apartments{})
+	db.PostgresDB.AutoMigrate(&Bookings{})
+	db.PostgresDB.AutoMigrate(&Pictures{})
 
-	db.AutoMigrate(&Apartments{})
-	db.AutoMigrate(&Bookings{})
-	db.AutoMigrate(&Pictures{})
-
-	if db.Find(&Apartments{}).RowsAffected == 0 &&
-		db.Find(&Bookings{}).RowsAffected == 0 &&
-		db.Find(&Bookings{}).RowsAffected == 0 {
+	if db.PostgresDB.Find(&Apartments{}).RowsAffected == 0 &&
+		db.PostgresDB.Find(&Bookings{}).RowsAffected == 0 &&
+		db.PostgresDB.Find(&Bookings{}).RowsAffected == 0 {
 		for _, item := range dummyApartments {
-			db.Create(&item)
+			db.PostgresDB.Create(&item)
 		}
 		for _, item := range dummyPictures {
-			db.Create(&item)
+			db.PostgresDB.Create(&item)
 		}
 		for _, item := range dummyBooking {
-			db.Create(&item)
+			db.PostgresDB.Create(&item)
 		}
 	}
 
@@ -87,6 +81,6 @@ func HelloServer(w http.ResponseWriter, r *http.Request) {
 func getApartments(c *gin.Context) {
 
 	var result []Apartments
-	db.Find(&result)
+	db.PostgresDB.Find(&result)
 	c.IndentedJSON(http.StatusOK, result)
 }
