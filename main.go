@@ -5,6 +5,7 @@ import (
 	"cool-hotel-app/models"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -49,6 +50,24 @@ func main() {
 	router := gin.Default()
 	router.GET("/apartments", getApartments)
 	router.POST("/post-picture", postPicture)
+	router.POST("/upload", func(c *gin.Context) {
+		// single file
+		file, err := c.FormFile("file")
+		if err != nil {
+			fmt.Printf("error1 - %v\n", err)
+			return
+		}
+		fmt.Println(file.Filename)
+		dst := fmt.Sprintf("files/%v", file.Filename)
+		// Upload the file to specific dst.
+		err2 := c.SaveUploadedFile(file, dst)
+		if err2 != nil {
+			fmt.Printf("error2 - %v\n", err2)
+			return
+		}
+
+		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
+	})
 	router.Run("localhost:8080")
 }
 
@@ -66,9 +85,20 @@ func getApartments(c *gin.Context) {
 func postPicture(c *gin.Context) {
 	var newPicture models.Pictures
 	if err := c.BindJSON(&newPicture); err != nil {
-		fmt.Println(err)
+		fmt.Printf("error1 - %v\n", err)
 		return
 	}
+	file, _ := c.FormFile("file")
+	if !strings.HasSuffix(file.Filename, ".jpeg") {
+		fmt.Printf("file has wrong format\n")
+		return
+	}
+	fmt.Println(file.Filename)
+
+	dst := fmt.Sprintf("/files/%v", file.Filename)
+	c.SaveUploadedFile(file, dst)
+
+	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	db.PostgresDB.Create(&newPicture)
 	c.IndentedJSON(http.StatusCreated, newPicture)
 }
