@@ -47,7 +47,10 @@ func main() {
 	}
 
 	router := gin.Default()
-	router.GET("/apartments", getApartments)
+	router.GET("/apartment", getApartment)
+	router.POST("/apartment", postApartment)
+	router.GET("/booking", getBooking)
+	router.POST("/booking", postBooking)
 	router.Run("localhost:8080")
 }
 
@@ -55,9 +58,30 @@ func HelloServer(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello, world!")
 }
 
-func getApartments(c *gin.Context) {
+func getApartment(c *gin.Context) {
 
 	var result []models.Apartments
 	db.PostgresDB.Find(&result)
 	c.IndentedJSON(http.StatusOK, result)
+}
+
+func getBooking(c *gin.Context) {
+
+	var result []models.Bookings
+	db.PostgresDB.Find(&result)
+	c.IndentedJSON(http.StatusOK, result)
+}
+
+func postBooking(c *gin.Context) {
+
+	var result []models.Bookings
+	c.BindJSON(&result)
+	db.PostgresDB.Create(&result)
+}
+
+func postApartment(c *gin.Context) {
+
+	var result []models.Apartments
+	c.BindJSON(&result)
+	db.PostgresDB.Create(&result)
 }
